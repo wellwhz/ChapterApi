@@ -1,0 +1,33 @@
+name: Build plugin
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        targets: ["win-x64", "linux-x64", "linux-arm", "linux-arm64"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Restore NuGet packages
+        run: |
+          dotnet restore "ChapterApi.sln"
+
+      - name: Build solution
+        run: |
+          dotnet build "ChapterApi.sln" --configuration Release
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ChapterApi_${{ matrix.targets }}
+          path: |
+            ChapterApi/bin/Release/
